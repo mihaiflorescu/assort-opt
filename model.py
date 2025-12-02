@@ -45,7 +45,7 @@ class Model:
         add_exit_choice=False,
         optimizer="lbfgs",
         lbfgs_tolerance=1e-8,
-        lbfgs_parallel_iterations=4,
+        lbfgs_parallel_iterations=8,
         callbacks=None,
         lr=0.001,
         epochs=1000,
@@ -77,7 +77,7 @@ class Model:
 
         self.optimizer_name = optimizer
         if optimizer.lower() == "adam":
-            self.optimizer = tf.keras.optimizers.Adam(lr)
+            self.optimizer = tf.keras.optimizers.legacy.Adam(lr)
         elif optimizer.lower() == "sgd":
             self.optimizer = tf.keras.optimizers.SGD(lr)
         elif optimizer.lower() == "adamax":
@@ -351,8 +351,9 @@ class Model:
             if self.stop_training:
                 print("Early Stopping taking effect")
                 break
-            t_range.set_description(desc)
-            t_range.refresh()
+            if hasattr(t_range, "set_description"):
+                t_range.set_description(desc)
+                t_range.refresh()
 
         temps_logs = {k: tf.reduce_mean(v) for k, v in train_logs.items()}
         self.callbacks.on_train_end(logs=temps_logs)
